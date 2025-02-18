@@ -13,6 +13,7 @@ class FoodLogScreen extends StatefulWidget {
 
 class _FoodLogScreenState extends State<FoodLogScreen> {
   Map<String, dynamic> foodLog = {};
+  List<String> foodItems = [];
 
   @override
   void initState() {
@@ -24,6 +25,7 @@ class _FoodLogScreenState extends State<FoodLogScreen> {
     final results = await DatabaseHelper.instance.retrieveFoodEntry(id);
     setState(() {
       foodLog = results;
+      foodItems = results['foodItems'].toString().split(',');
     });
   }
 
@@ -152,7 +154,10 @@ class _FoodLogScreenState extends State<FoodLogScreen> {
                     SizedBox(
                       height: 200, // Adjust height as needed
                       child: ListView(
-                        children: [_FoodItem(name: foodLog['foodItem']?.toString() ?? 'No food item')],
+                        children: [
+                          for (String item in foodItems)
+                            _FoodItem(name: item),
+                        ],
                       ),
                     ),
                   ],
