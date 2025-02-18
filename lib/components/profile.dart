@@ -7,71 +7,149 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Profile"),
+        title: const Text("Profile"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              // TODO: Navigate to edit profile
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Edit profile coming soon!')),
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile Picture Card
-            Card(
-              elevation: 4,
-              margin: EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+            // Profile Picture and Name
+            Center(
+              child: Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 50,
+                    backgroundImage: AssetImage("assets/profile.jpg"),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "John Doe",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
               ),
-              child: ListTile(
-                leading: CircleAvatar(
-                  radius: 30,
-                  backgroundImage: AssetImage("assets/profile.jpg"),
+            ),
+
+            // Contact Information
+            const Text(
+              "Contact Information",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _buildInfoRow(
+                      icon: Icons.email,
+                      label: "Email",
+                      value: "johndoe@gmail.com",
+                    ),
+                    const Divider(height: 24),
+                    _buildInfoRow(
+                      icon: Icons.phone,
+                      label: "Phone",
+                      value: "+1 234 567 8900",
+                    ),
+                  ],
                 ),
-                title: Text("John Doe",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text("johndoe@gmail.com"),
               ),
             ),
-            // Personal Information Card
-            Card(
-              elevation: 4,
-              margin: EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: ListTile(
-                leading: Icon(Icons.person, size: 40, color: Colors.blue),
-                title: Text("Personal Information",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text(
-                    "Age: 25\nGender: Male\nHeight: 5'10\"\nWeight: 70 kg"),
+
+            const SizedBox(height: 24),
+
+            // Personal Information
+            const Text(
+              "Personal Information",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
             ),
-            // Health Information Card
+            const SizedBox(height: 16),
             Card(
-              elevation: 4,
-              margin: EdgeInsets.symmetric(vertical: 8),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: ListTile(
-                leading:
-                    Icon(Icons.medical_services, size: 40, color: Colors.green),
-                title: Text("Health Information",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text(
-                    "Blood Type: O+\nAllergies: None\nMedical Conditions: None"),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _buildInfoRow(
+                      icon: Icons.calendar_today,
+                      label: "Age",
+                      value: "25 years",
+                    ),
+                    const Divider(height: 24),
+                    _buildInfoRow(
+                      icon: Icons.height,
+                      label: "Height",
+                      value: "5'10\" (178 cm)",
+                    ),
+                    const Divider(height: 24),
+                    _buildInfoRow(
+                      icon: Icons.monitor_weight,
+                      label: "Weight",
+                      value: "70 kg",
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Bring to edit page
-        },
-        tooltip: "Edit Profile",
-        child: Icon(Icons.edit),
-      ),
+    );
+  }
+
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 24, color: Colors.grey[600]),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

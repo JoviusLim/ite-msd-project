@@ -1,6 +1,8 @@
 class UserProfile {
   final int? id;
   final String name;
+  final String email;
+  final String phone;
   final int age;
   final double weight;
   final double height;
@@ -8,6 +10,8 @@ class UserProfile {
   UserProfile({
     this.id,
     required this.name,
+    required this.email,
+    required this.phone,
     required this.age,
     required this.weight,
     required this.height,
@@ -17,6 +21,8 @@ class UserProfile {
     return {
       'id': id,
       'name': name,
+      'email': email,
+      'phone': phone,
       'age': age,
       'weight': weight,
       'height': height,
@@ -27,6 +33,8 @@ class UserProfile {
     return UserProfile(
       id: map['id'],
       name: map['name'],
+      email: map['email'],
+      phone: map['phone'],
       age: map['age'],
       weight: map['weight'],
       height: map['height'],

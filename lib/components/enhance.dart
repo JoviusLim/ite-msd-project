@@ -44,7 +44,7 @@ class EnhanceScreen extends StatelessWidget {
               child: ListTile(
                 leading: Icon(Icons.local_fire_department,
                     size: 40, color: Colors.redAccent),
-                title: Text("Calories Intake",
+                title: Text("Calories Intake of the day",
                     style: TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text("Total Calories: 4500"),
                 onTap: () {

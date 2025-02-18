@@ -1,13 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:food_diary_app/utils/database_helper.dart';
+import 'package:intl/intl.dart';
 
-class FoodLogScreen extends StatelessWidget {
-  const FoodLogScreen({super.key});
+class FoodLogScreen extends StatefulWidget {
+  final String id;
+
+  const FoodLogScreen({super.key, required this.id});
+
+  @override
+  State<FoodLogScreen> createState() => _FoodLogScreenState();
+}
+
+class _FoodLogScreenState extends State<FoodLogScreen> {
+  Map<String, dynamic> foodLog = {};
+
+  @override
+  void initState() {
+    super.initState();
+    getFoodLog(int.parse(widget.id));
+  }
+
+  Future<void> getFoodLog(int id) async {
+    final results = await DatabaseHelper.instance.retrieveFoodEntry(id);
+    setState(() {
+      foodLog = results;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Breakfast"),
+        title: Text(
+          foodLog["mealType"] != null &&
+                  foodLog["mealType"].toString().isNotEmpty
+              ? foodLog["mealType"].toString()[0].toUpperCase() +
+                  foodLog["mealType"].toString().substring(1)
+              : "Food Log",
+        ),
         actions: [
           PopupMenuButton<String>(
             onSelected: (String value) {
@@ -44,26 +74,22 @@ class FoodLogScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
-                          children: const [
-                            Icon(Icons.access_time, size: 20),
-                            SizedBox(width: 8),
+                          children: [
+                            const Icon(Icons.access_time, size: 20),
+                            const SizedBox(width: 8),
                             Text(
-                              "8:00 AM",
-                              style: TextStyle(
-                                fontSize: 24,
+                              foodLog['time'] != null
+                                  ? DateFormat('HH:mm\ndd/MM/yyyy')
+                                      .format(DateTime.parse(foodLog['time']))
+                                  : 'No time available',
+                              style: const TextStyle(
+                                fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          "Morning Meal",
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 16,
-                          ),
-                        ),
                       ],
                     ),
                     Container(
@@ -73,16 +99,16 @@ class FoodLogScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
-                        children: const [
+                        children: [
                           Text(
-                            "300",
-                            style: TextStyle(
+                            foodLog['calories'].toString(),
+                            style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
                               color: Colors.green,
                             ),
                           ),
-                          Text(
+                          const Text(
                             "calories",
                             style: TextStyle(
                               color: Colors.green,
@@ -123,17 +149,11 @@ class FoodLogScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    _FoodItem(
-                      name: "2 Eggs",
-                    ),
-                    const Divider(),
-                    _FoodItem(
-                      name: "1 Toast",
-                    ),
-                    const Divider(),
-                    _FoodItem(
-                      name: "1 Orange Juice",
+                    SizedBox(
+                      height: 200, // Adjust height as needed
+                      child: ListView(
+                        children: [_FoodItem(name: foodLog['foodItem']?.toString() ?? 'No food item')],
+                      ),
                     ),
                   ],
                 ),
@@ -157,6 +177,10 @@ class FoodLogScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     TextField(
+                      controller: TextEditingController(text: foodLog['notes']),
+                      onEditingComplete: () {
+                        // Update notes
+                      },
                       decoration: InputDecoration(
                         hintText: "Add notes about your meal...",
                         border: OutlineInputBorder(

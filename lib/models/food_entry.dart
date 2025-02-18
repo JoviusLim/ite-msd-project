@@ -24,7 +24,7 @@ class FoodEntry {
       'id': id,
       'image': image,
       'mealType': mealType,
-      'foodItems': foodItems,
+      'foodItems': foodItems.toString(),
       'foodDescription': notes,
       'calories': calories,
       'timestap': time.millisecondsSinceEpoch,
