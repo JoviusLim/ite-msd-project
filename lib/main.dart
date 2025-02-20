@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:food_diary_app/components/diary_list.dart';
 import 'package:food_diary_app/components/enhance.dart';
 import 'package:food_diary_app/components/profile.dart';
+import 'package:flutter/services.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -17,10 +18,17 @@ class FoodDiaryApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Disable rotating to landscape by allowing only portrait modes
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     return MaterialApp(
-        title: "Food Diary App",
-        theme: ThemeData(primarySwatch: Colors.green),
-        home: MainScreen());
+      title: "Food Diary App",
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: MainScreen(),
+      debugShowCheckedModeBanner: false,
+    );
   }
 }
 

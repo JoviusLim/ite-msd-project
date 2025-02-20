@@ -25,7 +25,46 @@ class _FoodLogScreenState extends State<FoodLogScreen> {
     final results = await DatabaseHelper.instance.retrieveFoodEntry(id);
     setState(() {
       foodLog = results;
+      if (results['foodItems'] == "") {
+        return;
+      }
       foodItems = results['foodItems'].toString().split(',');
+    });
+  }
+
+  // Update food item in the list
+  void updateFoodItem(int index, String newName) {
+    setState(() {
+      foodItems[index] = newName;
+
+      String foodItemsString = foodItems.join(',');
+      DatabaseHelper.instance
+          .updateFoodItems(int.parse(widget.id), foodItemsString);
+    });
+  }
+
+  // Delete food item from the list
+  void deleteFoodItem(int index) {
+    setState(() {
+      foodItems.removeAt(index);
+      if (foodItems.isEmpty) {
+        DatabaseHelper.instance.updateFoodItems(int.parse(widget.id), '');
+        return;
+      }
+      String foodItemsString = foodItems.join(',');
+      DatabaseHelper.instance
+          .updateFoodItems(int.parse(widget.id), foodItemsString);
+    });
+  }
+
+  // Add a food item to the list
+  void addFoodItem(String newItem) {
+    setState(() {
+      foodItems.add(newItem);
+      String foodItemsString = foodItems.join(',');
+
+      DatabaseHelper.instance
+          .updateFoodItems(int.parse(widget.id), foodItemsString);
     });
   }
 
@@ -51,7 +90,6 @@ class _FoodLogScreenState extends State<FoodLogScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    // Optional food image above the date and calories
                     if (foodLog['image'] != null)
                       Column(
                         children: [
@@ -141,17 +179,59 @@ class _FoodLogScreenState extends State<FoodLogScreen> {
                           icon: const Icon(Icons.add),
                           label: const Text("Add Item"),
                           onPressed: () {
-                            // Add new food item
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                TextEditingController controller =
+                                    TextEditingController();
+                                return AlertDialog(
+                                  title: const Text("Add Food Item"),
+                                  content: TextField(
+                                    controller: controller,
+                                    decoration: const InputDecoration(
+                                      hintText: "Enter new food item",
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text("Cancel"),
+                                    ),
+                                    TextButton(
+                                      onPressed: () {
+                                        String newItem = controller.text;
+                                        if (newItem.isNotEmpty) {
+                                          addFoodItem(newItem);
+                                        }
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text("Add"),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
                           },
                         ),
                       ],
                     ),
                     SizedBox(
                       height: 200, // Adjust height as needed
-                      child: ListView(
-                        children: [
-                          for (String item in foodItems) _FoodItem(name: item),
-                        ],
+                      child: ListView.builder(
+                        itemCount: foodItems.length,
+                        itemBuilder: (context, index) {
+                          return _FoodItem(
+                            name: foodItems[index],
+                            onEdit: (oldName, newName) {
+                              updateFoodItem(index, newName);
+                            },
+                            onDelete: () {
+                              deleteFoodItem(index);
+                            },
+                          );
+                        },
                       ),
                     ),
                   ],
@@ -177,8 +257,9 @@ class _FoodLogScreenState extends State<FoodLogScreen> {
                     const SizedBox(height: 16),
                     TextField(
                       controller: TextEditingController(text: foodLog['notes']),
-                      onEditingComplete: () {
-                        // Update notes
+                      onChanged: (value) async {
+                        await DatabaseHelper.instance
+                            .updateNotes(int.parse(widget.id), value);
                       },
                       decoration: InputDecoration(
                         hintText: "Add notes about your meal...",
@@ -201,43 +282,28 @@ class _FoodLogScreenState extends State<FoodLogScreen> {
 
 class _FoodItem extends StatelessWidget {
   final String name;
+  final void Function(String oldName, String newName) onEdit;
+  final VoidCallback onDelete;
 
   const _FoodItem({
     required this.name,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
+    return ListTile(
+      title: Text(
+        name,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              Icons.restaurant,
-              color: Colors.grey.shade700,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
@@ -263,7 +329,10 @@ class _FoodItem extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          // Update the food item name
+                          String newName = controller.text;
+                          if (newName.isNotEmpty) {
+                            onEdit(name, newName);
+                          }
                           Navigator.of(context).pop();
                         },
                         child: const Text("Save"),
@@ -276,9 +345,7 @@ class _FoodItem extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.delete),
-            onPressed: () {
-              // Delete food item
-            },
+            onPressed: onDelete,
           ),
         ],
       ),

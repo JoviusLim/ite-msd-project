@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:food_diary_app/models/profile_model.dart';
 import 'package:food_diary_app/utils/database_helper.dart';
 
 class EnhanceScreen extends StatefulWidget {
@@ -11,15 +12,24 @@ class EnhanceScreen extends StatefulWidget {
 class _EnhanceScreenState extends State<EnhanceScreen> {
   int totalCalories = 0;
   int totalEntries = 0;
+  int bmi = 0;
 
-  Future<void> getTotalCalories() async {
+  Future<void> getData() async {
     // Fetch total calories from the database
     Map<dynamic, dynamic> data =
         await DatabaseHelper.instance.retrieveTotalCaloriesAndEntries();
+    ProfileModel profile = await DatabaseHelper.instance.getProfileData();
     setState(() {
       totalCalories = data['totalCalories'];
       totalEntries = data['totalEntries'];
+      bmi = profile.weight ~/ ((profile.height / 100) * (profile.height / 100));
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
   }
 
   @override
@@ -88,7 +98,7 @@ class _EnhanceScreenState extends State<EnhanceScreen> {
                     Icon(Icons.fitness_center, size: 40, color: Colors.blue),
                 title: Text("BMI Calculator",
                     style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text("Calculate your BMI"),
+                subtitle: Text("Your BMI: $bmi"),
                 onTap: () {
                   // Navigate to BMI Calculator Page
                   /*  Navigator.push(

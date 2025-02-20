@@ -1,14 +1,14 @@
-class UserProfile {
-  final int? id;
+class ProfileModel {
+  final int id;
   final String name;
   final String email;
   final String phone;
   final int age;
-  final double weight;
-  final double height;
+  final int weight;
+  final int height;
 
-  UserProfile({
-    this.id,
+  ProfileModel({
+    required this.id,
     required this.name,
     required this.email,
     required this.phone,
@@ -29,8 +29,8 @@ class UserProfile {
     };
   }
 
-  factory UserProfile.fromMap(Map<String, dynamic> map) {
-    return UserProfile(
+  static ProfileModel fromMap(Map<String, dynamic> map) {
+    return ProfileModel(
       id: map['id'],
       name: map['name'],
       email: map['email'],

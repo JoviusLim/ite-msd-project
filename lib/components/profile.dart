@@ -1,10 +1,85 @@
 import 'package:flutter/material.dart';
+import '../utils/database_helper.dart';
+import '../models/profile_model.dart';
+import 'edit_profile.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  ProfileModel? _profile;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final profileData = await DatabaseHelper.instance.getProfileData();
+      setState(() {
+        _profile = profileData;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _profile = null;
+        _isLoading = false;
+      });
+      _showCreateProfileDialog();
+    }
+  }
+
+  void _showCreateProfileDialog() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Create Profile'),
+            content: const Text('Please create your profile to continue.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const EditProfileScreen(isNewProfile: true),
+                    ),
+                  ).then((_) => _loadProfile());
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_profile == null) {
+      return const Scaffold(
+        body: Center(child: Text('No profile data')),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Profile"),
@@ -12,10 +87,15 @@ class ProfileScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () {
-              // TODO: Navigate to edit profile
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Edit profile coming soon!')),
-              );
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => EditProfileScreen(
+                    isNewProfile: false,
+                    profile: _profile,
+                  ),
+                ),
+              ).then((_) => _loadProfile());
             },
           ),
         ],
@@ -25,18 +105,12 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile Picture and Name
             Center(
               child: Column(
                 children: [
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage("assets/profile.jpg"),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "John Doe",
-                    style: TextStyle(
+                  Text(
+                    _profile!.name,
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -45,8 +119,6 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Contact Information
             const Text(
               "Contact Information",
               style: TextStyle(
@@ -63,22 +135,19 @@ class ProfileScreen extends StatelessWidget {
                     _buildInfoRow(
                       icon: Icons.email,
                       label: "Email",
-                      value: "johndoe@gmail.com",
+                      value: _profile!.email,
                     ),
                     const Divider(height: 24),
                     _buildInfoRow(
                       icon: Icons.phone,
                       label: "Phone",
-                      value: "+1 234 567 8900",
+                      value: _profile!.phone,
                     ),
                   ],
                 ),
               ),
             ),
-
             const SizedBox(height: 24),
-
-            // Personal Information
             const Text(
               "Personal Information",
               style: TextStyle(
@@ -95,19 +164,19 @@ class ProfileScreen extends StatelessWidget {
                     _buildInfoRow(
                       icon: Icons.calendar_today,
                       label: "Age",
-                      value: "25 years",
+                      value: "${_profile!.age} years",
                     ),
                     const Divider(height: 24),
                     _buildInfoRow(
                       icon: Icons.height,
                       label: "Height",
-                      value: "5'10\" (178 cm)",
+                      value: "${_profile!.height} cm",
                     ),
                     const Divider(height: 24),
                     _buildInfoRow(
                       icon: Icons.monitor_weight,
                       label: "Weight",
-                      value: "70 kg",
+                      value: "${_profile!.weight} kg",
                     ),
                   ],
                 ),

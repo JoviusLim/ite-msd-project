@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import '../models/profile_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -106,6 +107,54 @@ class DatabaseHelper {
       'totalCalories': totalCalories,
       'totalEntries': totalEntries,
     };
+  }
+
+  Future<void> updateFoodItems(int id, String foodItems) async {
+    Database db = await instance.database;
+    await db.rawUpdate('''
+      UPDATE food_entry
+      SET foodItems = ?
+      WHERE id = ?
+    ''', [foodItems, id]);
+  }
+
+  Future<void> updateNotes(int id, String notes) async {
+    Database db = await instance.database;
+    await db.rawUpdate('''
+      UPDATE food_entry
+      SET notes = ?
+      WHERE id = ?
+    ''', [notes, id]);
+  }
+
+  Future<ProfileModel> getProfileData() async {
+    final Database db = await instance.database;
+    final List<Map<String, dynamic>> maps = await db.query('user_profile');
+
+    if (maps.isEmpty) {
+      throw Exception('No profile found');
+    }
+
+    return ProfileModel.fromMap(maps.first);
+  }
+
+  Future<void> createProfileData(ProfileModel profile) async {
+    final Database db = await instance.database;
+    await db.insert(
+      'user_profile',
+      profile.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> updateProfileData(int id, ProfileModel profile) async {
+    final Database db = await instance.database;
+    await db.update(
+      'user_profile',
+      profile.toMap(),
+      where: 'id = ?',
+      whereArgs: [id],
+    );
   }
 
   Future<void> close() async {
