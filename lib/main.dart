@@ -1,9 +1,14 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:food_diary_app/components/diary_list.dart';
 import 'package:food_diary_app/components/enhance.dart';
 import 'package:food_diary_app/components/profile.dart';
 
-void main() {
+List<CameraDescription> cameras = [];
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  cameras = await availableCameras();
   runApp(FoodDiaryApp());
 }
 
@@ -29,7 +34,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   final List<Widget> _pages = <Widget>[
-    DiaryListScreen(),
+    DiaryListScreen(camera: cameras.first),
     EnhanceScreen(),
     ProfileScreen(),
   ];

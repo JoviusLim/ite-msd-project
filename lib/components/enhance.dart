@@ -1,7 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:food_diary_app/utils/database_helper.dart';
 
-class EnhanceScreen extends StatelessWidget {
+class EnhanceScreen extends StatefulWidget {
   const EnhanceScreen({super.key});
+
+  @override
+  State<EnhanceScreen> createState() => _EnhanceScreenState();
+}
+
+class _EnhanceScreenState extends State<EnhanceScreen> {
+  int totalCalories = 0;
+  int totalEntries = 0;
+
+  Future<void> getTotalCalories() async {
+    // Fetch total calories from the database
+    Map<dynamic, dynamic> data =
+        await DatabaseHelper.instance.retrieveTotalCaloriesAndEntries();
+    setState(() {
+      totalCalories = data['totalCalories'];
+      totalEntries = data['totalEntries'];
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +43,8 @@ class EnhanceScreen extends StatelessWidget {
                     Icon(Icons.insert_chart, size: 40, color: Colors.green),
                 title: Text("Diary Summary",
                     style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text("Total Entries: 10\nAverage Calories: 450"),
+                subtitle: Text(
+                    "Total Entries: $totalEntries\nAverage Calories: ${totalEntries > 0 ? totalCalories ~/ totalEntries : 0}"),
                 onTap: () {
                   // Navigate to Diary Summary Page
                   /* Navigator.push(
@@ -46,7 +66,7 @@ class EnhanceScreen extends StatelessWidget {
                     size: 40, color: Colors.redAccent),
                 title: Text("Calories Intake of the day",
                     style: TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text("Total Calories: 4500"),
+                subtitle: Text("Total Calories: $totalCalories"),
                 onTap: () {
                   // Navigate to Calories Intake Page
                   /*   Navigator.push(

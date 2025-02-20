@@ -95,6 +95,19 @@ class DatabaseHelper {
     return await db.insert('user_profile', row);
   }
 
+  Future<Map> retrieveTotalCaloriesAndEntries() async {
+    List<Map<String, dynamic>> entries = await retrieveFoodEntries();
+    int totalCalories = 0;
+    int totalEntries = entries.length;
+    for (Map<String, dynamic> entry in entries) {
+      totalCalories += (entry['calories'] as int);
+    }
+    return {
+      'totalCalories': totalCalories,
+      'totalEntries': totalEntries,
+    };
+  }
+
   Future<void> close() async {
     final db = await instance.database;
     await db.close();

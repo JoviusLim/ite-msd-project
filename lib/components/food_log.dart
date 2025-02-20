@@ -40,84 +40,79 @@ class _FoodLogScreenState extends State<FoodLogScreen> {
                   foodLog["mealType"].toString().substring(1)
               : "Food Log",
         ),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (String value) {
-              if (value == 'edit') {
-                // Edit action
-              } else if (value == 'delete') {
-                // Delete action
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return {'Edit', 'Delete'}.map((String choice) {
-                return PopupMenuItem<String>(
-                  value: choice.toLowerCase(),
-                  child: Text(choice),
-                );
-              }).toList();
-            },
-            icon: const Icon(Icons.more_vert),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Time and Calories Card
+            // Image, Time and Calories Card
             Card(
               margin: const EdgeInsets.all(16),
               child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.access_time, size: 20),
-                            const SizedBox(width: 8),
-                            Text(
-                              foodLog['time'] != null
-                                  ? DateFormat('HH:mm\ndd/MM/yyyy')
-                                      .format(DateTime.parse(foodLog['time']))
-                                  : 'No time available',
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                      ],
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
+                    // Optional food image above the date and calories
+                    if (foodLog['image'] != null)
+                      Column(
                         children: [
-                          Text(
-                            foodLog['calories'].toString(),
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
+                          Image.memory(
+                            foodLog['image'],
+                            fit: BoxFit.cover,
                           ),
-                          const Text(
-                            "calories",
-                            style: TextStyle(
-                              color: Colors.green,
-                            ),
-                          ),
+                          const SizedBox(height: 16),
                         ],
                       ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.access_time, size: 20),
+                                const SizedBox(width: 8),
+                                Text(
+                                  foodLog['time'] != null
+                                      ? DateFormat('HH:mm\ndd/MM/yyyy').format(
+                                          DateTime.parse(foodLog['time']))
+                                      : 'No time available',
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade100,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                foodLog['calories'].toString(),
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                              const Text(
+                                "calories",
+                                style: TextStyle(
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -155,8 +150,7 @@ class _FoodLogScreenState extends State<FoodLogScreen> {
                       height: 200, // Adjust height as needed
                       child: ListView(
                         children: [
-                          for (String item in foodItems)
-                            _FoodItem(name: item),
+                          for (String item in foodItems) _FoodItem(name: item),
                         ],
                       ),
                     ),
@@ -200,13 +194,6 @@ class _FoodLogScreenState extends State<FoodLogScreen> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.add_photo_alternate),
-        label: const Text("Add Photo"),
-        onPressed: () {
-          // Add meal photo
-        },
       ),
     );
   }
