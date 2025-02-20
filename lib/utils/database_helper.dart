@@ -109,6 +109,24 @@ class DatabaseHelper {
     };
   }
 
+  Future<int> getTotalCaloriesForDate(DateTime date) async {
+    Database db = await instance.database;
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(Duration(days: 1));
+
+    final List<Map<String, dynamic>> entries = await db.query(
+      'food_entry',
+      where: 'time >= ? AND time < ?',
+      whereArgs: [
+        startOfDay.toIso8601String(),
+        endOfDay.toIso8601String()
+      ],
+    );
+
+    return entries.fold<int>(
+        0, (int sum, item) => sum + (item['calories'] as int));
+  }
+
   Future<void> updateFoodItems(int id, String foodItems) async {
     Database db = await instance.database;
     await db.rawUpdate('''
@@ -155,6 +173,37 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  Future<List<Map<String, dynamic>>> getWaterIntakeForDate(
+      DateTime date) async {
+    Database db = await instance.database;
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(Duration(days: 1));
+
+    return await db.query(
+      'water_intake',
+      where: 'time >= ? AND time < ?',
+      whereArgs: [
+        startOfDay.millisecondsSinceEpoch,
+        endOfDay.millisecondsSinceEpoch
+      ],
+      orderBy: 'time DESC',
+    );
+  }
+
+  Future<int> getTotalWaterIntakeForDate(DateTime date) async {
+    final intakes = await getWaterIntakeForDate(date);
+    return intakes.fold<int>(
+        0, (int sum, item) => sum + (item['amount'] as int));
+  }
+
+  Future<int> addWaterIntake(int amount) async {
+    Database db = await instance.database;
+    return await db.insert('water_intake', {
+      'amount': amount,
+      'time': DateTime.now().millisecondsSinceEpoch,
+    });
   }
 
   Future<void> close() async {
